@@ -55,3 +55,19 @@ __NSMallocBlock__ (_NSConcreteMallocBlock)
 - _NSConcreteStackBlock，存储区域：栈，复制效果：从栈复制到堆
 - _NSConcreteGlobalBlock，存储区域：程序的数据区域，复制效果：什么也不做
 - _NSConcreteMallocBlock，存储区域：堆，复制效果：引用计数增加
+
+## block的copy
+### 在ARC情况下，编译器会自动将block从栈上面copy到堆上，如下情况:
+- block作为函数返回值时
+- 将block赋值给__strong指针时
+- block作为Cocoa API中方法名含有usingBlock的方法参数时
+- block作为GCD API的方法参数时
+### 在MRC情况下block属性的建议写法
+```objc
+@property (copy,nonatomic) void(^block)(void);
+```
+### 在ARC下block属性的建议写法
+```objc
+@property (strong,nonatomic) void(^block)(void);
+@property (copy,nonatomic) void(^block)(void);
+```
