@@ -71,3 +71,28 @@ __NSMallocBlock__ (_NSConcreteMallocBlock)
 @property (strong,nonatomic) void(^block)(void);
 @property (copy,nonatomic) void(^block)(void);
 ```
+
+## block引用对象类型的auto变量
+### 当block内部访问了对象类型的auto变量时
+- 如果block是在栈上，将不会对auto变量产生强引用
+- 如果block被拷贝到堆上
+  > 会调用block内部的copy函数  
+  > copy函数内部会调用_Block_object_assign函数
+  > _Block_object_assign函数会根据auto变量的修饰符(__strong、__weak、_unsafe_unretained)做出操作，类似于retain（形成强引用、弱引用）
+- 如果block从堆上移除
+  > 会调用block内部的dispose函数
+  > dispose函数内部会调用_Block_object_dispose函数
+  > _Block_object_dispose函数会自动释放引用的auto函数，类似与release
+
+> copy函数，栈上的Block复制到堆时  
+> dispose函数，堆上的Block被废弃时
+
+
+## 注意⚠️
+### 在使用clang转换OC为C++代码时，可能会遇到以下问题
+```objc
+cannot create __weak reference in file using manual reference
+```
+#### 解决方案：支持ARC、制定运行时系统版本
+```objc
+xcrun -sdk iphoneos clang -arch arm64 -rewrite-objc -fobjc-arc -fobjc-runtime=ios-9.0.0 你的文件路径
