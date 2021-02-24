@@ -309,4 +309,55 @@ if(自己没有初始化){
     // _cmd == @selector(weight)
     return [objc_getAssociatedObject(self, _cmd) intValue];
 }
+```  
+## 关联对象的原理
+```objc
+objc_setAssociatedObject
+```
+### 实现关联对象技术的核心对象
+- AssociationsManager
+- AssociationsHashMap
+- ObjectAssociationMap
+- ObjcAssociation  
+### 源码解读
+```objc
+class AssociationsManager {
+    using Storage = ExplicitInitDenseMap<DisguisedPtr<objc_object>, ObjectAssociationMap>;
+    static Storage _mapStorage;
+    ...
+};
+
+```
+```objc
+typedef DenseMap<DisguisedPtr<objc_object>, ObjectAssociationMap> AssociationsHashMap;
+```
+```objc
+typedef DenseMap<const void *, ObjcAssociation> ObjectAssociationMap;
+```
+```objc
+class ObjcAssociation {
+    uintptr_t _policy;
+    id _value;
+    ...
+};
+
+```
+### 总结
+#### 关联对象并不是存储在被关联对象本身内存中
+#### 关联对象存储在全局统一的一个AssociationsManager中
+#### 设置关联对象为nil，相当于移除关联对象
+#### 默认情况下，因为分类底层结构的限制，不能添加成员变量到分类中，但是可以通过关联对象来间接实现
+#### 关联对象提供了以下API
+- 添加关联对象
+```objc
+void
+objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy)
+```
+- 获得关联对象
+```objc
+id objc_getAssociatedObject(id object,const void *key)
+```
+- 移除所有的关联对象
+```objc
+void objc_removeAssociatedObjects(id object)
 ```
