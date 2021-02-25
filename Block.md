@@ -78,7 +78,7 @@ __NSMallocBlock__ (_NSConcreteMallocBlock)
 - 如果block被拷贝到堆上
   > 会调用block内部的copy函数  
   > copy函数内部会调用_Block_object_assign函数
-  > _Block_object_assign函数会根据auto变量的修饰符(__strong、__weak、_unsafe_unretained)做出操作，类似于retain（形成强引用、弱引用）
+  > _Block_object_assign函数会根据auto变量的修饰符(__strong、__weak、_unsafe_unretained)做出操作，类似于retain（形成强引用、弱引用）(仅限于ARC，如果是MRC不会)
 - 如果block从堆上移除
   > 会调用block内部的dispose函数
   > dispose函数内部会调用_Block_object_dispose函数
@@ -87,6 +87,96 @@ __NSMallocBlock__ (_NSConcreteMallocBlock)
 > copy函数，栈上的Block复制到堆时  
 > dispose函数，堆上的Block被废弃时
 
+## __block修饰符
+### __block可以用于解决block内部无法修改auto变量值的问题
+### __block不能修饰全局变量、静态变量(static)
+### 编译器会将__block变量包装成一个对象
+```objc
+__block int age = 10;
+//最终会转换成
+struct __Block_byref_age_0 {
+  void *__isa;
+  //指针，指向自己
+  __block_byref_age_0 *__forwarding;
+  int __flags;
+  int __size;
+  int age;
+}
+//后面的0是第一个block就用0，第二个用1，第三个用2，以此类推
+struct __main_block_impl_0{
+  struct __block_impl impl;
+  struct __main_block_desc_0* Desc;
+
+  //这个指针指向__Block_byref_age_0的结构体，通过这个指针找到__forwarding，然后再通过__forwarding找到age
+  __Block_byref_age_0 *age;
+  //省略部分代码，同上面block的本质一样
+  ...
+}
+```
+
+## __block的内存管理
+### 当block函数在栈上时，不会对__block的变量产生强引用
+### 当block被copy到堆上时
+- 会调用block内部的copy函数
+- copy函数内部会调用_Block_object_assign函数
+- _Block_object_assign函数会对__block的变量产生强引用(也会将__block的变量拷贝到堆上)
+### 当block栋堆中移除时
+- 会调用block内部的dispose函数
+- dispose函数内部会调用_Block_object_dispose函数
+- _Block_object_dispose函数会自动释放引用的__block变量(release)
+### 对象类型的auto变量、__block变量
+#### 当block在栈上时，对它们都不会产生强引用
+#### 当block拷贝到堆上时，都会通过copy函数来处理他们
+- __block变量(假设变量名叫做a)
+```objc
+_Block_object_assgin((void*)&dst->a,(void*)src->a,8/*BLOCK_FIELD_IS_BYREF*/);
+```
+- 当对象类型的auto变量(假设变量名叫做p)
+```objc
+_Block_object_assgin((void*)&dst->p,(void*)src->p,3/*BLOCK_FIELD_IS_OBJECT*/);
+```
+#### 当block从堆上移除时，都会通过dispose函数来释放他们
+- __block变量(假设变量名叫做a)
+```objc
+_Block_object_dispose((void*)&src->a,8/*BLOCK_FIELD_IS_BYREF*/);
+```
+- 对象类型的auto变量(假设变量名叫做p)
+```objc
+_Block_object_assgin((void*)src->p,3/*BLOCK_FIELD_IS_OBJECT*/);
+```
+#### __block的__forwarding指针
+##### 执行copy操作之后，__forwarding指针是指向堆上的block，栈上有一个block内存，堆上有一个block内存，从而保证，不管访问栈上或者堆上的block都能保证访问堆上的block
+
+## 被__block修饰的对象类型
+(假设对象名为person)
+block->struct __Block_byref_person_0->MJPerson
+## 解决循环引用的问题(ARC)
+### __weak和__unsafe_unretained解决循环引用的问题
+```objc
+//__weak:指向的对象销毁时，会自动让指针置为nil
+__weak typeof(self) weakSelf = self;
+self.block = ^{
+  printf("%p",weakSelf);
+};
+//__unsafe_unretained：向的对象销毁时，不会自动置为nil，当再次访问时会发生野指针的问题(不安全)
+__unsafe_unretained typeof(self) weakSelf = self;
+self.block = ^{
+  printf("%p",weakSelf);
+}
+```
+### __block解决(必须要调用block)
+```objc
+__block typeof(self) weakSelf = self;
+self.block = ^{
+  printf("%p",weakSelf);
+  weakSelf = nil;
+}
+self.block();
+```
+## 解决循环引用的问题(MRC)
+### MRC不支持__weak的
+- 通过__unsafe_unreatained解决
+- 用__block解决(__block的时候，在MRC情况下，copy函数内部会调用_Block_object_assign函数 _Block_object_assign函数不会进行强引用)
 
 ## 注意⚠️
 ### 在使用clang转换OC为C++代码时，可能会遇到以下问题
