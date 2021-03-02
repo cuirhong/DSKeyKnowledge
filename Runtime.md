@@ -158,11 +158,28 @@ iOS中提供了一个叫做@encode的指令，可以将具体的类型表示成�
 1. ?-> unkonwn type    
 
 ## 方法缓存
-### Class内部结构中有个方法缓存（cache_t），用散列表来缓存曾经调用过的方法，可以提高方法的查找速度
+### Class内部结构中有个方法缓存（cache_t），用散列表(哈希表)来缓存曾经调用过的方法，可以提高方法的查找速度
 ```objc
 struct cache_t{
     struct bucket_t *_buckets;//散列表
     mask_t _mask;//散列表的长度减1，如_buckets的长度为10，则_mask为9
     mask_t _occopied;//已经缓存的方法数量
 }
+struct bucket_t{
+    cache_key_t _key;//SEL作为key
+    IMP _imp;//函数的内存地址
+}
 ```
+### 缓存查找
+- objc-cache.mm
+```objc
+bucket_t * cache_t::find(cache_key_t k, id receiver)
+```
+
+## objc_msgSend执行流程
+### OC中的方法调用，其实都是转换为objc_msgSend函数的调用
+### objc_msgSend的执行流程可以分为3大阶段
+- 消息发送
+- 动态方法解析
+- 消息转发
+如果找不到合适的方法进行调用，会报错unrecognized selector sent to instance
