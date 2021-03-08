@@ -183,3 +183,350 @@ bucket_t * cache_t::find(cache_key_t k, id receiver)
 - 动态方法解析
 - 消息转发
 如果找不到合适的方法进行调用，会报错unrecognized selector sent to instance
+### 源码跟读
+### objc_msgSend的源码实现（objc-msg-arm64.s文件中）
+- objc_msgSend的源码（汇编）
+```objc
+	ENTRY _objc_msgSend
+	UNWIND _objc_msgSend, NoFrame
+    //p0,#0寄存器：消息接收者，receiver
+	cmp	p0, #0			// nil check and tagged pointer check
+#if SUPPORT_TAGGED_POINTERS
+    //b 跳转 le:小于等于 如果消息接收者为空就跳转到LNilOrTagged,如果消息接收者不为空，继续执行
+	b.le	LNilOrTagged		//  (MSB tagged pointer looks negative)
+#else
+	b.eq	LReturnZero
+#endif
+	ldr	p13, [x0]		// p13 = isa
+	GetClassFromIsa_p16 p13, 1, x0	// p16 = class
+LGetIsaDone:
+	// calls imp or objc_msgSend_uncached
+	CacheLookup NORMAL, _objc_msgSend, __objc_msgSend_uncached
+
+#if SUPPORT_TAGGED_POINTERS
+LNilOrTagged:
+	b.eq	LReturnZero		// nil check
+	GetTaggedClass
+	b	LGetIsaDone
+// SUPPORT_TAGGED_POINTERS
+#endif
+
+LReturnZero:
+	// x0 is already zero
+	mov	x1, #0
+	movi	d0, #0
+	movi	d1, #0
+	movi	d2, #0
+	movi	d3, #0
+	ret
+
+	END_ENTRY _objc_msgSend
+```
+- 查找缓存的源码(汇编)
+```objc
+.macro CacheLookup Mode, Function, MissLabelDynamic, MissLabelConstant
+	//
+	// Restart protocol:
+	//
+	//   As soon as we're past the LLookupStart\Function label we may have
+	//   loaded an invalid cache pointer or mask.
+	//
+	//   When task_restartable_ranges_synchronize() is called,
+	//   (or when a signal hits us) before we're past LLookupEnd\Function,
+	//   then our PC will be reset to LLookupRecover\Function which forcefully
+	//   jumps to the cache-miss codepath which have the following
+	//   requirements:
+	//
+	//   GETIMP:
+	//     The cache-miss is just returning NULL (setting x0 to 0)
+	//
+	//   NORMAL and LOOKUP:
+	//   - x0 contains the receiver
+	//   - x1 contains the selector
+	//   - x16 contains the isa
+	//   - other registers are set as per calling conventions
+	//
+
+	mov	x15, x16			// stash the original isa
+LLookupStart\Function:
+	// p1 = SEL, p16 = isa
+#if CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_HIGH_16_BIG_ADDRS
+	ldr	p10, [x16, #CACHE]				// p10 = mask|buckets
+	lsr	p11, p10, #48			// p11 = mask
+	and	p10, p10, #0xffffffffffff	// p10 = buckets
+	and	w12, w1, w11			// x12 = _cmd & mask
+#elif CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_HIGH_16
+	ldr	p11, [x16, #CACHE]			// p11 = mask|buckets
+#if CONFIG_USE_PREOPT_CACHES
+#if __has_feature(ptrauth_calls)
+	tbnz	p11, #0, LLookupPreopt\Function
+	and	p10, p11, #0x0000ffffffffffff	// p10 = buckets
+#else
+	and	p10, p11, #0x0000fffffffffffe	// p10 = buckets
+	tbnz	p11, #0, LLookupPreopt\Function
+#endif
+	eor	p12, p1, p1, LSR #7
+	and	p12, p12, p11, LSR #48		// x12 = (_cmd ^ (_cmd >> 7)) & mask
+#else
+	and	p10, p11, #0x0000ffffffffffff	// p10 = buckets
+	and	p12, p1, p11, LSR #48		// x12 = _cmd & mask
+#endif // CONFIG_USE_PREOPT_CACHES
+#elif CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_LOW_4
+	ldr	p11, [x16, #CACHE]				// p11 = mask|buckets
+	and	p10, p11, #~0xf			// p10 = buckets
+	and	p11, p11, #0xf			// p11 = maskShift
+	mov	p12, #0xffff
+	lsr	p11, p12, p11			// p11 = mask = 0xffff >> p11
+	and	p12, p1, p11			// x12 = _cmd & mask
+#else
+#error Unsupported cache mask storage for ARM64.
+#endif
+
+	add	p13, p10, p12, LSL #(1+PTRSHIFT)
+						// p13 = buckets + ((_cmd & mask) << (1+PTRSHIFT))
+
+						// do {
+1:	ldp	p17, p9, [x13], #-BUCKET_SIZE	//     {imp, sel} = *bucket--
+	cmp	p9, p1				//     if (sel != _cmd) {
+	b.ne	3f				//         scan more
+						//     } else {
+2:	CacheHit \Mode				// hit:    call or return imp
+						//     }
+3:	cbz	p9, \MissLabelDynamic		//     if (sel == 0) goto Miss;
+	cmp	p13, p10			// } while (bucket >= buckets)
+	b.hs	1b
+
+	// wrap-around:
+	//   p10 = first bucket
+	//   p11 = mask (and maybe other bits on LP64)
+	//   p12 = _cmd & mask
+	//
+	// A full cache can happen with CACHE_ALLOW_FULL_UTILIZATION.
+	// So stop when we circle back to the first probed bucket
+	// rather than when hitting the first bucket again.
+	//
+	// Note that we might probe the initial bucket twice
+	// when the first probed slot is the last entry.
+
+
+#if CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_HIGH_16_BIG_ADDRS
+	add	p13, p10, w11, UXTW #(1+PTRSHIFT)
+						// p13 = buckets + (mask << 1+PTRSHIFT)
+#elif CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_HIGH_16
+	add	p13, p10, p11, LSR #(48 - (1+PTRSHIFT))
+						// p13 = buckets + (mask << 1+PTRSHIFT)
+						// see comment about maskZeroBits
+#elif CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_LOW_4
+	add	p13, p10, p11, LSL #(1+PTRSHIFT)
+						// p13 = buckets + (mask << 1+PTRSHIFT)
+#else
+#error Unsupported cache mask storage for ARM64.
+#endif
+	add	p12, p10, p12, LSL #(1+PTRSHIFT)
+						// p12 = first probed bucket
+
+						// do {
+4:	ldp	p17, p9, [x13], #-BUCKET_SIZE	//     {imp, sel} = *bucket--
+	cmp	p9, p1				//     if (sel == _cmd)
+	b.eq	2b				//         goto hit
+	cmp	p9, #0				// } while (sel != 0 &&
+	ccmp	p13, p12, #0, ne		//     bucket > first_probed)
+	b.hi	4b
+
+LLookupEnd\Function:
+LLookupRecover\Function:
+	b	\MissLabelDynamic
+
+#if CONFIG_USE_PREOPT_CACHES
+#if CACHE_MASK_STORAGE != CACHE_MASK_STORAGE_HIGH_16
+#error config unsupported
+#endif
+LLookupPreopt\Function:
+#if __has_feature(ptrauth_calls)
+	and	p10, p11, #0x007ffffffffffffe	// p10 = buckets
+	autdb	x10, x16			// auth as early as possible
+#endif
+
+	// x12 = (_cmd - first_shared_cache_sel)
+	adrp	x9, _MagicSelRef@PAGE
+	ldr	p9, [x9, _MagicSelRef@PAGEOFF]
+	sub	p12, p1, p9
+
+	// w9  = ((_cmd - first_shared_cache_sel) >> hash_shift & hash_mask)
+#if __has_feature(ptrauth_calls)
+	// bits 63..60 of x11 are the number of bits in hash_mask
+	// bits 59..55 of x11 is hash_shift
+
+	lsr	x17, x11, #55			// w17 = (hash_shift, ...)
+	lsr	w9, w12, w17			// >>= shift
+
+	lsr	x17, x11, #60			// w17 = mask_bits
+	mov	x11, #0x7fff
+	lsr	x11, x11, x17			// p11 = mask (0x7fff >> mask_bits)
+	and	x9, x9, x11			// &= mask
+#else
+	// bits 63..53 of x11 is hash_mask
+	// bits 52..48 of x11 is hash_shift
+	lsr	x17, x11, #48			// w17 = (hash_shift, hash_mask)
+	lsr	w9, w12, w17			// >>= shift
+	and	x9, x9, x11, LSR #53		// &=  mask
+#endif
+
+	ldr	x17, [x10, x9, LSL #3]		// x17 == sel_offs | (imp_offs << 32)
+	cmp	x12, w17, uxtw
+
+.if \Mode == GETIMP
+	b.ne	\MissLabelConstant		// cache miss
+	sub	x0, x16, x17, LSR #32		// imp = isa - imp_offs
+	SignAsImp x0
+	ret
+.else
+	b.ne	5f				// cache miss
+	sub	x17, x16, x17, LSR #32		// imp = isa - imp_offs
+.if \Mode == NORMAL
+	br	x17
+.elseif \Mode == LOOKUP
+	orr x16, x16, #3 // for instrumentation, note that we hit a constant cache
+	SignAsImp x17
+	ret
+.else
+.abort  unhandled mode \Mode
+.endif
+
+5:	ldursw	x9, [x10, #-8]			// offset -8 is the fallback offset
+	add	x16, x16, x9			// compute the fallback isa
+	b	LLookupStart\Function		// lookup again with a new isa
+.endif
+#endif // CONFIG_USE_PREOPT_CACHES
+
+.endmacro
+```
+#### 自己写的伪代码
+```objc 
+void objc_msgSend(id receiver,SEL selector){
+  if (receiver == nil){
+      return;
+  }
+  //查找缓存
+}
+```
+### objc_msgSend执行流程01-消息发送
+a. 调用方法结束查找并将方法缓存到reveiverClass的cache中
+1. receiver是否为空，如果是直接return，否则继续执行
+1. 从reveiverClass的cache中查找方法，如果找到方法调用方法结束，否则继续执行
+1. 从reveiverClass的class_rw_t中查找方法，如果找到方法执行上面的a，否则继续执行
+   > 已经排序的方法列表，二分查找  
+   > 没有排序的，遍历查找 
+1. 从superClass的cahce中查找方法，如果找到方法执行上面的a，否则继续执行
+1. 从superClass的class_rw_t中查找方法，如果找到方法执行上面的a，否则继续执行
+1. 上层是否还有superClass
+   > 如果有：继续循环执行第4步  
+   > 如果没有：进入objc_msgSend的第二阶段（动态方法解析）
+
+⚠️ receiver通过isa指针找到receiverClass  
+⚠️ receiverClass通过superclass指针找到superClass
+### objc_msgSend执行流程02-动态方法解析
+1. 是否曾经有动态解析，如果有消息转发，如果没有继续执行
+1. 调用+resolveInstanceMethod:或者+resolveClassMethod:方法来动态解析方法
+1. 标记为已经动态解析
+1. 消息发送
+- 开发者可以实现以下方法，来动态添加方法实现
+  > +resolveInstanceMethod:  
+  > +resolveClassMethod:
+- 动态解析过后，会重新走“消息发送”的流程
+  > “从receiverClass的cache中查找方法”这一步开始执行
+
+源码
+```objc
+    if ((behavior & LOOKUP_RESOLVER)  &&  !triedResolver) {
+        methodListLock.unlock();
+        _class_resolveMethod(cls, sel, inst);
+        triedResolver = YES;
+        goto retry;
+    }
+```
+### objc_msgSend执行流程03-消息转发
+#### 源码
+```objc
+ // No implementation found, and method resolver didn't help. 
+    // Use forwarding.
+    _cache_addForwardEntry(cls, sel);
+    methodPC = _objc_msgForward_impcache;
+```
+#### 步骤
+1. 调用forwardingTargetForSelector方法，如果返回值不为nil，调用objc_msgSend(返回值，SEL);如果返回值为nil，则继续第2步
+1. 调用methodSignatureForSelector方法，如果返回值为nil，调用doesNotRecognizeSelector:方法，如果返回值不为空，调用forwardInvocation  
+
+#### _objc_msgForward_impcache的内部实现（精简）:
+```objc
+int __forwarding__(void *frameStackPointer, int isStret) {
+    id receiver = *(id *)frameStackPointer;
+    SEL sel = *(SEL *)(frameStackPointer + 8);
+    const char *selName = sel_getName(sel);
+    Class receiverClass = object_getClass(receiver);
+
+    // 调用 forwardingTargetForSelector:
+    if (class_respondsToSelector(receiverClass, @selector(forwardingTargetForSelector:))) {
+        id forwardingTarget = [receiver forwardingTargetForSelector:sel];
+        if (forwardingTarget && forwardingTarget != receiver) {
+            return objc_msgSend(forwardingTarget, sel, ...);
+        }
+    }
+
+    // 调用 methodSignatureForSelector 获取方法签名后再调用 forwardInvocation
+    if (class_respondsToSelector(receiverClass, @selector(methodSignatureForSelector:))) {
+        NSMethodSignature *methodSignature = [receiver methodSignatureForSelector:sel];
+        if (methodSignature && class_respondsToSelector(receiverClass, @selector(forwardInvocation:))) {
+            NSInvocation *invocation = [NSInvocation _invocationWithMethodSignature:methodSignature frame:frameStackPointer];
+
+            [receiver forwardInvocation:invocation];
+
+            void *returnValue = NULL;
+            [invocation getReturnValue:&value];
+            return returnValue;
+        }
+    }
+
+    if (class_respondsToSelector(receiverClass,@selector(doesNotRecognizeSelector:))) {
+        [receiver doesNotRecognizeSelector:sel];
+    }
+
+    // The point of no return.
+    kill(getpid(), 9);
+}
+```
+1. 调用forwardingTargetForSelector方法
+```objc
+- (id)forwardingTargetForSelector:(SEL)aSelector{
+	if (aSelector == @selector(test)){
+      return <能处理消息的实例对象>
+	}
+   return [super forwardingTargetForSelector:aSelector];
+}
+
++ (id)forwardingTargetForSelector:(SEL)aSelector{
+   return <能处理消息的类对象>
+}
+```
+2. 调用 methodSignatureForSelector 获取方法签名后再调用 forwardInvocation
+```objc
+//方法签名：返回值类型、参数类型
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector{
+   if (aSelector == @selector(test)){
+	   return [NSMethodSignature signatureWithObjcTypes:@"v16@0:8"];
+   }
+   return [super methodSignatureForSelector:aSelector];
+}
+// NSInvocation封装了一个方法调用，包括：方法调用者、方法名、方法参数
+/*
+anInvocation.target 方法调用者
+anInvocation.selector 方法名
+[anInvocation getArgument:NULL atIndex:0]
+*/
+- (void)forwardInvocation:(NSInvocation *)anInvocation{
+   anInvocation.target = 对象;
+   [anInvocation invoke];
+   //或者
+   [anInvocation invokeWithTarget:对象];
+}
+```
