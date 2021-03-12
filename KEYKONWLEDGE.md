@@ -6,3 +6,8 @@ p (IMP)0x104f38b57
 //输出结果
 (IMP) $1 = 0x0000000104f38b57 (Foundation`_NSSetObjectValueAndNotify)
 ```
+## debug调试，bt打印
+bt可以打印出更多的线程信息
+```objc
+bt
+```
