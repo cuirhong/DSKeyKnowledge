@@ -473,11 +473,10 @@ self.innerThread = [[MJThread alloc] initWithBlock:^{
 ### 停止RunLoop
 ```objc
 if (!self.innerThread) return;
-//这里的waitUntilDone最好用YES，知道停止之后再执行
+//这里的waitUntilDone最好用YES，直到停止之后再执行
 [self performSelector:@selector(__stop) onThread:self.innerThread withObject:nil waitUntilDone:YES];
 
 
-#pragma mark - private methods
 - (void)__stop
 {
     self.stopped = YES;
