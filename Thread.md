@@ -293,6 +293,20 @@ pthread_mutex_unlock(&_mutex);
  //销毁锁
 pthread_mutex_destroy(&_mutex)
 ```
+```objc
+//线程等待信号
+pthread_cond_wait(&_cond,&_mutex)
+
+//发送信号(激活一个等待该条件的线程)
+pthread_cond_signal(&_cond)
+
+//激活所有等待该条件的线程
+pthread_cond_broadcast(&_cond)
+
+
+//销毁资源
+pthread_cond_destroy(&_cond)
+```
 
 ```objc
 #define PTHREAD_MUTEX_NORMAL		0
@@ -302,3 +316,40 @@ pthread_mutex_destroy(&_mutex)
 #define PTHREAD_MUTEX_DEFAULT		PTHREAD_MUTEX_NORMAL
 ```
 #### 递归锁：允许同一个线程对一把锁进行重复加锁
+
+### NSLock、NSRecursiveLock
+#### NSLock是对mutex普通锁的封装
+```objc
+- (BOOL)tryLock;
+- (BOOL)lockBeforeDate:(NSDate)limit;
+```
+#### NSLock是对mutex递归锁的封装
+
+### NSCondition
+#### NSCondition是对mutex和cond的封装
+```objc
+- (void)wait;
+- (BOOL)waitUntilDate:(NSDate*)limit;
+- (void)signal;
+- (void)broadcast;
+```
+### NSConditionLock
+#### NSConditionLock是对NSCondition的进一步封装，可以设置具体的条件值
+```objc
+- (instancetype)initWithCondition:(NSInteger)condition;
+@property (readonly) NSInteger condition;
+- (void)lockWhenCondition:(NSInteger)conditioin;
+- (BOOL)tryLock;
+- (BOOL)tryLockWhenCondition:(NSInteger)condition;
+- (void)unlockWithCondition:(NSInteger)condition;
+- (BOOL)lockBeforeDate:(NSDate*)limit;
+- (BOOL)lockWhenCondition:(NSInteger)condition beforeDate:(NSDate *)limit;
+```
+### dispatch_queue
+#### 直接使用GCD的串行队列，也是可以实现线程同步的
+```objc
+dispatch_queue_t queue = dispatch_queue_create("lock_queue",DISPATCH_QUEUE_SERIAL);
+dispatch_sync(queue,^{
+    //任务
+});
+```
