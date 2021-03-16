@@ -353,3 +353,165 @@ dispatch_sync(queue,^{
     //任务
 });
 ```
+### dispatch_semaphore
+#### semaphore叫做“信号量”
+#### 信号量的初始值，可以用来控制线程并发访问的最大数量
+#### 信号量的初始值为1，代表同时只允许1条线程访问资源，保证线程同步
+```objc
+int value = 1;
+//初始化信号量
+dispatch_semaphore_t semaphore = dispatch_semaphore_create(value);
+//如果信号量的值<=0，当线程就会进入休眠等待（直到信号量的值>0）
+//如果信号量的值>0，就减1，然后往下执行后面的代码
+dispatch_semaphore_wait(semaphore,DISPATCH_TIME_FOREVER);
+//让信号量的值加1
+dispatch_semaphore_signal(semaphore);
+```
+### @synchronized
+#### @synchronized是对mutex的递归锁的封装
+#### 源码查看：objc4中的objc-sync.mm文件
+```objc
+int objc_sync_enter(id obj)
+{
+    int result = OBJC_SYNC_SUCCESS;
+
+    if (obj) {
+        SyncData* data = id2data(obj, ACQUIRE);
+        ASSERT(data);
+        data->mutex.lock();
+    } else {
+        // @synchronized(nil) does nothing
+        if (DebugNilSync) {
+            _objc_inform("NIL SYNC DEBUG: @synchronized(nil); set a breakpoint on objc_sync_nil to debug");
+        }
+        objc_sync_nil();
+    }
+
+    return result;
+}
+
+// SyncData就是对mutex的封装（递归锁）
+typedef struct alignas(CacheLineSize) SyncData {
+    struct SyncData* nextData;
+    DisguisedPtr<objc_object> object;
+    int32_t threadCount;  // number of THREADS using this block
+    recursive_mutex_t mutex;
+} SyncData;
+
+```
+#### @synchronized(obj)内部会生成obj对应的递归锁，然后进行加锁、解锁操作
+```objc
+@synchronized([self class]){
+    //任务
+}
+```
+## iOS线程同步方案性能比较
+### 性能从高到底排序
+```objc
+os_unfaire_lock
+OSSpinLock
+dispatch_semaphore(推荐)
+pthread_mutex（推荐）
+dispatch_queue(DISPATCH_QUEUE_SERIAL)
+NSLock
+NSCondition
+pthread_mutex(recursive)
+NSRecursiveLock
+NSConditionLock
+@synchronized
+```
+## 自旋锁、互斥锁比较
+### 什么情况使用自旋锁比较划算？
+- 预计线程等待锁的时间比较短
+- 加锁的代码（临界区）经常被调用，但竞争情况很少发生
+- CPU资源不紧张
+- 多核处理器
+### 什么情况下使用互斥锁比较划算
+- 预计线程等待锁的时间较长
+- 单核处理器
+- 临界区有IO操作
+- 临界区代码复杂或者循环量大
+- 临界区竞争非常激烈
+
+## atomic
+### tomic用于保证属性setter、getter的原子性操作，相当于在getter和setter内部加了线程同步的锁
+### 可以参考源码objc4的objc-accessors.mm
+### 它并不能保证使用属性的过程是线程安全的
+set方法的源码
+```objc
+static inline void reallySetProperty(id self, SEL _cmd, id newValue, ptrdiff_t offset, bool atomic, bool copy, bool mutableCopy)
+{
+    if (offset == 0) {
+        object_setClass(self, newValue);
+        return;
+    }
+
+    id oldValue;
+    id *slot = (id*) ((char*)self + offset);
+
+    if (copy) {
+        newValue = [newValue copyWithZone:nil];
+    } else if (mutableCopy) {
+        newValue = [newValue mutableCopyWithZone:nil];
+    } else {
+        if (*slot == newValue) return;
+        newValue = objc_retain(newValue);
+    }
+
+    if (!atomic) {
+        oldValue = *slot;
+        *slot = newValue;
+    } else {
+        spinlock_t& slotlock = PropertyLocks[slot];
+        slotlock.lock();
+        oldValue = *slot;
+        *slot = newValue;        
+        slotlock.unlock();
+    }
+
+    objc_release(oldValue);
+}
+```
+## iOS中的读写安全方案
+### IO操作，文件操作
+- 从文件中读取内容
+- 往文件中写入内容
+### 思考如何实现如下场景
+- 同一时间，只能有1条线程进行写的操作
+- 同一时间，允许有多个线程进行读的操作
+- 同一时间，不允许既有写又有读的操作
+### 上面的场景就是典型的“多读单写”，经常用于文件等数据的读取操作，iOS中的实现方案有
+- pthread_rwlock（读写锁）
+- dispatch_barrier_async(异步栅栏调用)
+### pthread_rwlock
+```objc
+//初始化锁
+pthread_rwlock_t lock;
+pthread_rwlock_init(&lock,NULL);
+//读-加锁
+pthread_rwlock_rdlock(&lock);
+//读-尝试加锁
+pthread_rwlock_tryrdlock(&lock);
+//写-加锁
+pthread_rwlock_wrlock(&lock);
+//写-尝试加锁
+pthread_rwlock_trywrlock(&lock);
+//解锁
+pthread_rwlock_unlock(&lock);
+//销毁
+pthread_rwlock_destroy(&lock);
+```
+### dispatch_barrier_async
+#### 这个函数传入的并发队列必须是自己通过dispatch_queue_cretate创建的
+#### 如果传入的是一个串行或是一个全局的并发队列，那dispatch_barrier_async便等同于dispatch_async函数的效果
+```objc
+dispatch_queue_t queue = dispatch_queue_create("rw_queue",DISPATCH_QUEUE_CONCURRENT)
+//读
+dispatch_async(queue,^{
+
+})
+//写
+dispatch_barrier_async(queue,^{
+    
+})
+```
