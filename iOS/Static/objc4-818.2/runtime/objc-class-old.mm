@@ -2438,6 +2438,7 @@ void *objc_destructInstance(id obj)
         Class isa = obj->getIsa();
 
         if (isa->hasCxxDtor()) {
+            //清除成员变量
             object_cxxDestruct(obj);
         }
 
@@ -2445,6 +2446,7 @@ void *objc_destructInstance(id obj)
             _object_remove_assocations(obj);
         }
 
+        //将指向当前对象的弱指针置为nil
         objc_clear_deallocating(obj);
     }
 
