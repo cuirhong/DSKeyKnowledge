@@ -48,7 +48,10 @@ exprot FLUTTER_STORAGE_BASE_URL=https://storage.flutter
 - 很多AS包括的方便操作没有，比如点击启动、热更新点击等;
 - 在某些情况下会出现一些问题
 - 有时候热更新不及时常常看不到效果，必须重启
-- 某些情况下，没有代码提示不够灵敏
+- 某些情况下，没有代码提示不够灵敏  
+
+⚠️：VSCode: 安装code runner插件运行代码
+
 ### Android Studio
 #### 优点
 - 集成开发环境(IDE)，需要的功能基本都有
@@ -59,3 +62,8 @@ exprot FLUTTER_STORAGE_BASE_URL=https://storage.flutter
 - 占据的计算机资源也很多，所以电脑配置较低是会出现卡顿的
 - 使用须知：使用AS开发Flutter我们需要安装两个插件 ：Flutter和Dart
 
+## 打开模拟器
+- Android studio  
+右下角configs->AVD manager
+- xcode  
+ 左上角xcode->Open Developer Tool->Simulator
