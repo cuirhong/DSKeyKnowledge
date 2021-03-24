@@ -21,3 +21,8 @@ forKeyPath可以设置对象的子属性
 - 会顺序查找getKey、key、isKey、_key的方法，存在直接返回值；如果不存在，查看accessInstanceVariablesDirectly返回值，如果返回NO调用setValue:forundefinedKey:并抛出异常NSUnknownKeyException
 - accessInstanceVariablesDirectly返回YES，顺序查找成员变量（_key、_isKey、key、isKey），找到成员变量直接取值，没有找到调用setValue:forundefinedKey:并抛出异常NSUnknownKeyException
 
+## 面试题
+- 通过KVC修改属性会触发KVO么？
+  - 会触发KVO
+- KVC的赋值和取值过程是怎样的？原理是什么？
+

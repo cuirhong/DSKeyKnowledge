@@ -485,3 +485,19 @@ if (!self.innerThread) return;
 }
 ```
 
+## 面试题
+- 讲讲 RunLoop，项目中有用到吗？
+
+- runloop内部实现逻辑？
+
+- runloop和线程的关系？
+
+- timer 与 runloop 的关系？
+
+- 程序中添加每3秒响应一次的NSTimer，当拖动tableview时timer可能无法响应要怎么解决？
+
+- runloop 是怎么响应用户操作的， 具体流程是什么样的？
+
+- 说说runLoop的几种状态
+
+- runloop的mode作用是什么？

@@ -2,6 +2,7 @@
 Davis的知识点总结 
 ## iOS 
 - [OC的本质](./iOS/Objc.md)
+- [isa和superclass指针](./iOS/isa-superclass.md)
 - [KVC](./iOS/KVC.md)
 - [KVO](./iOS/KVO.md)
 - [Category](./iOS/Category.md)

@@ -536,3 +536,19 @@ class AutoreleasePoolPage{
 
 ## 局部变量的释放
 - ARC情况下，如果自动生成是通过autoreleasePool的形式的话，需要等到Runloop循环周期到才能被释放；如果是生成直接调用release的情况，就会立马释放
+
+## 面试题
+- 使用CADisplayLink、NSTimer有什么注意点？
+
+- 介绍下内存的几大区域
+
+- 讲一下你对 iOS 内存管理的理解
+
+- ARC 都帮我们做了什么？
+  - LLVM + Runtime
+
+- weak指针的实现原理
+
+- autorelease对象在什么时机会被调用release
+
+- 方法里有局部对象， 出了方法后会立即释放吗

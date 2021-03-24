@@ -78,3 +78,18 @@ KVO是通过set方法触发的
 
 ## 窥探Foundation
 使用Hopper Disassembler反编译软件工具打开./Static/Foundation文件即可查看，内部可以找到_NSSet*ValueAndNotify方法
+
+## 面试题
+- iOS用什么方式实现对一个对象的KVO？(KVO的本质是什么？)
+  - 利用RuntimeAPI动态生成一个子类，并且让instance对象的isa指向这个全新的子类
+  - 当修改instance对象的属性时，会调用Foundation的_NSSetXXXValueAndNotify函数
+    - willChangeValueForKey:
+    - 父类原来的setter
+    - didChangeValueForKey:
+  - 内部会触发监听器（Oberser）的监听方法( observeValueForKeyPath:ofObject:change:context:）
+- 如何手动触发KVO？
+  - 手动调用willChangeValueForKey:和didChangeValueForKey:
+- 直接修改成员变量会触发KVO么？
+  - 不会触发KVO
+
+
