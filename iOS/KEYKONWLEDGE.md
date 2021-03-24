@@ -16,6 +16,11 @@ bt
 // si调试可以一步一步执行汇编语言
 si
 ```
+## debug调试
+```objc
+//打印一个对象的isa指针地址
+p/x (long)person->isa
+```
 ## 查看内存数据
 步骤(快捷键：shift+commond+M)：Debug(Xcode)->Debug Workflow->View Memory->在底部的Address输入指针的地址值->回车键即可看到
 ```objc
