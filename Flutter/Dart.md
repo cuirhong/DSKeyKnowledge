@@ -41,6 +41,19 @@ var model = Model()
     ..removeAt(1);
   print(listInt); // output: [0, 2]
 ```
+## 函数是一等公民
+```dart
+typedef Calculate = int Function(int num1,int num2);
+
+void test(Calculate calc){
+  calc(20,30);
+}
+```
+
+## Object和dynamic的区别
+- Object调用方法时，编译时会报错
+- dynamic调用方法时，编译不报错，但是运行时会存在安全隐患
+
 ## 面向对象
 - 命名构造函数
 ```dart
