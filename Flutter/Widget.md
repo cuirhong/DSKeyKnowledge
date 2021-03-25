@@ -16,6 +16,14 @@
 ### StatelessWidget的生命周期
 1. 构造函数
 1. build函数
+### StatefulWidget的生命周期
+- 在下图中，灰色部分的内容是Flutter内部操作的，我们并不需要手动去设置它们；
+- 白色部分表示我们可以去监听到或者可以手动调用的方法；
+![](./Static/images/stateful-widget-live.png)
+
+- mounted是State内部设置的一个属性
+- dirty state的含义是脏的State,它实际是通过一个Element的东西（我们还没有讲到Flutter绘制原理）的属性来标记的；将它标记为dirty会等待下一次的重绘检查，强制调用build方法来构建我们的Widget；
+- clean state的含义是干净的State,它表示当前build出来的Widget，下一次重绘检查时不需要重新build；
 
  
 ## 细微知识点
@@ -46,6 +54,9 @@
   - 在Flutter的运行过程中:
     - Widget是不断的销毁和创建的
     - 当我们自己的状态发生改变时，并不希望重新状态一个新的State
+
+- 将已经存在的StatelessWidget转换成一个StatefulWidget : 直接使用快捷键：将光标放在StatelessWidget名字，然后直接[option + 回车]即可看到转换的入口
+- 将已经build的一个Widget抽取成一个class，快捷键：将光标放在Widget上面，然后直接【option+回车+w】即可
 
 ## 刷新界面setState方法的源代码
 ```dart
@@ -113,5 +124,4 @@
     //刷新界面的原理
     _element.markNeedsBuild();
   }
-
 ```
