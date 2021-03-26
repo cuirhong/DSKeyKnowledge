@@ -198,6 +198,70 @@ Positioned(
 )
 ```
 ## ListView
-
+### ListView是都会创建item
+### ListBuilder
+```dart
+ ListView.builder({
+   itemCount:10,
+   itemBuilder:(BuildContext ctx, int index){
+   }
+ })
+```
+### ListView.separated
+```dart
+ListView.separated({
+  itemCount:10,
+  itemBuilder:
+  separatorBuilder:(BuildContext ctx,int index){
+    return Divider(
+      //分割线的高度
+      thickness:10,
+      //整个的高度
+      height:30,
+    )
+  }
+})
+```
 ## GridView
+### GridView()
+```dart
+GridView(
+  gridDelegate:
+  chidren:List.generate()
+)
+```
+### GridView.count
+### GridView.extent
+### GridView.builder
 ## sliver
+### CustomScrollView
+### SliverSafeArea滚动区域的安全区域（适配刘海）
+### SliverPadding 滚动区域的间隙
+### SliverAppBar 顶部appBar和Banner一同使用
+
+## 监听滚动 
+### 方式一：controller
+```dart
+ScrollController 
+```
+- 可以设置默认offset
+- 监听滚动，也可以监听滚动的位置
+- 但是不能监听开始和结束滚动
+### 方式二：NotificationListener
+```objc
+NotificationListener(
+  onNotification: (ScrollNotification notification){
+    if (notification is ScrollStartNotification){
+      //开始滚动
+    }else if (notification is ScrollEndNotification) {
+      //结束滚动
+    }else if (notification is ScrollUpdateNotification){
+      print("当前滚动的位置${notification.metrics.pixels}");
+      print("总滚动的距离:${notification.metrics.maxScrollExtent}");
+    }
+    //多个NotificationListener，如果返回true就会取消冒泡，false就会继续冒泡
+    return true;
+  },
+);
+```
+

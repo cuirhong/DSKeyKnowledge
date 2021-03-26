@@ -12,6 +12,19 @@ class MyApp extends StatelessWidget {
 class DSHomePage extends StatelessWidget {
   DSHomePage(){
     print("构造函数");
+
+    var future = Future(
+        (){
+          return "";
+        }
+    );
+    future.then((value){
+
+    }).catchError((error){
+
+    }).whenComplete((){
+
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -79,6 +92,33 @@ class _DSContentState extends State<DSContentBody> {
           ),
           Text(
             '传递的信息:${widget.message}'
+          ),
+          CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+
+                ),
+                delegate: SliverChildBuilderDelegate(
+                    (BuildContext ctx,int int){
+                      return NotificationListener(
+                        onNotification: (ScrollNotification notification){
+                          if (notification is ScrollStartNotification){
+                            //开始滚动
+                          }else if (notification is ScrollEndNotification) {
+                            //结束滚动
+                          }else if (notification is ScrollUpdateNotification){
+                            print("当前滚动的位置${notification.metrics.pixels}");
+                            print("总滚动的距离:${notification.metrics.maxScrollExtent}");
+                          }
+                          //多个NotificationListener，如果返回true就会取消冒泡，false就会继续冒泡
+                          return true;
+                        },
+                      );
+                    }
+                ),
+              )
+            ],
           )
         ],
       ),
