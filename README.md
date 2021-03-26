@@ -18,6 +18,7 @@ Davis的知识点总结
 ## Flutter
 - [混合框架的认知](./Flutter/Recognize.md)
 - [环境](./Flutter/Envirnoment.md)
+- [Widget](./Flutter/Widget.md)
 
 ## Ionic
 - [运行和调试](./ionic/Ionic.md)

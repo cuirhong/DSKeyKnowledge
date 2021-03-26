@@ -63,7 +63,14 @@ class _DSContentState extends State<DSContentBody> {
                     _counter--;
                   });
                 },
-              )
+              ),
+              FlatButton(
+
+              ),
+              FadeInImage(
+                image: NetworkImage(''),
+              ),
+              Flexible()
             ],
           ),
           Text(

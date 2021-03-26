@@ -25,6 +25,31 @@
 - dirty state的含义是脏的State,它实际是通过一个Element的东西（我们还没有讲到Flutter绘制原理）的属性来标记的；将它标记为dirty会等待下一次的重绘检查，强制调用build方法来构建我们的Widget；
 - clean state的含义是干净的State,它表示当前build出来的Widget，下一次重绘检查时不需要重新build；
 
+#### 执行StatefulWidget中相关的方法：
+
+  - 执行StatefulWidget的构造函数（Constructor）来创建出StatefulWidget；
+
+  - 执行StatefulWidget的createState方法，来创建一个维护StatefulWidget的State对象；
+
+#### 调用createState创建State对象时，执行State类的相关方法：
+
+  - 执行State类的构造方法（Constructor）来创建State对象；
+
+  - 执行initState，我们通常会在这个方法中执行一些数据初始化的操作，或者也可能会发送网络请求；注意：这个方法是重写父类的方法，必须调用super，因为父类中会进行一些其他操作；并且如果你阅读源码，你会发现这里有一个注解（annotation）：@mustCallSuper
+
+  - 执行didChangeDependencies方法，这个方法在两种情况下会调用
+    - 调用initState会调用；
+
+    - 从其他对象中依赖一些数据发生改变时，比如前面我们提到的InheritedWidget（这个后面会讲到）；
+
+  - Flutter执行build方法，来看一下我们当前的Widget需要渲染哪些Widget；
+
+  - 当前的Widget不再使用时，会调用dispose进行销毁；
+
+  - 手动调用setState方法，会根据最新的状态（数据）来重新调用build方法，构建对应的Widgets；
+
+  - 执行didUpdateWidget方法是在当父Widget触发重建（rebuild）时，系统会调用didUpdateWidget方法；
+
  
 ## 细微知识点
 - 形成的是一个Widget树，类似于组件化开发
@@ -125,3 +150,54 @@
     _element.markNeedsBuild();
   }
 ```
+## Button
+### FlatButton
+- 默认有一个最小的宽高，因为继承MaterialButton 
+```dart
+//取消最小的宽高设置:包裹一个ButtonTheme
+ButtonTheme(
+  minWidth:30,
+  height:30,
+  child:FlatButton()
+)
+```
+## Image
+### 占位图
+```dart
+FadeImage(
+  placeholder:AssetImage("assets/images/juren.jpeg"),
+  image:NetworkImage(imageUrl)
+)
+```
+- 图片缓存：1000张和100M
+
+## 单子布局
+- Align->Center
+- Padding
+- Container
+## 多子布局
+### Row
+- MainAxisAlignment 
+- 水平方向也是希望包裹内容,那么设置mainAxisSize = min
+- CrossAxisAlignment
+  - baseline(必须有文本才有效果):必须和textBaseline一起使用
+  - stretch : 先让Row占据交叉轴尽可能大的空间，将所有的子Widget交叉轴的高度，拉伸到最大
+
+## Flexible
+### Expanded : 一般都是用这个，拉伸操作，是Flexible的子类
+## Stack
+- 默认大小是包裹内容，默认是从左上角开始排列
+- fit:expand 将子元素拉伸到尽可能大
+## Positioned
+- 绝对布局
+```dart
+Positioned(
+  right:20,
+  bottom:10,
+  child:
+)
+```
+## ListView
+
+## GridView
+## sliver
