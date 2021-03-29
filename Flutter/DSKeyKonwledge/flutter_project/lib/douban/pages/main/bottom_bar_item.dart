@@ -6,7 +6,7 @@ class DSBottomBarItem extends BottomNavigationBarItem {
   DSBottomBarItem(String iconName, String title) :super(
       title: Text(title),
       icon: Image.asset(
-          "assets/images/tabbar/${iconName}_black.png", width: 32),
+          "assets/images/tabbar/${iconName}_black.png", width: 30,gaplessPlayback: true),
       activeIcon: Image.asset(
-          "assets/images/tabbar/${iconName}_red.png", width: 32));
+          "assets/images/tabbar/${iconName}_red.png", width: 30,gaplessPlayback: true));
 }

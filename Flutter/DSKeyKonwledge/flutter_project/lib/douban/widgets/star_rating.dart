@@ -69,14 +69,14 @@ class _DSStarRatingState extends State<DSStarRating> {
     final star = widget.selectImage;
     // 2.构造满填充的star
     double oneValue = widget.maxRating / widget.count;
-    print("yige de zhi ${oneValue}");
+
     int entireCount = (widget.rating / oneValue).floor();
     for (var i = 0 ; i < entireCount;i++){
       stars.add(star);
     }
     // 3.构建部分填充star
     double leftWidth = ((widget.rating / oneValue) - entireCount) * widget.size;
-    print("宽度：${leftWidth}");
+
     final halfStar = ClipRect(
         clipper: DSStarClipper(leftWidth),
         child: star

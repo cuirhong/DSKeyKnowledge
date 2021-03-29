@@ -265,3 +265,15 @@ NotificationListener(
 );
 ```
 
+## 快速生成toString方法  
+快捷键：Commond + N (还有其他很多，比如构造器等)
+
+## 快速根据json生成一个转换模型的代码  
+- 工具链接：https://javiercbk.github.io/json_to_dart/
+> FeHelper可以帮助API请求数据查看工具
+- Android studio 自带一个插件：FlutterJsonBeanFactory，安装之后，可以自动根据json生成Dart类，但是也有弊端(属性不对等)
+
+## 打印所在文件/行/列
+```dart
+
+```

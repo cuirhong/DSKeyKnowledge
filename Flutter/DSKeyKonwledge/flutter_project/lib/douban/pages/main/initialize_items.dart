@@ -14,7 +14,7 @@ List<DSBottomBarItem> tabbarItems = [
 
 List<Widget> pages = [
   DSHomePage(),
-  DSHomePage(),
-  DSHomePage(),
+  DSMinePage(),
+  DSMinePage(),
   DSMinePage(),
 ];
