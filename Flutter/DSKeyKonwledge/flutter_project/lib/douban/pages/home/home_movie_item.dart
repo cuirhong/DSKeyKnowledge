@@ -48,6 +48,7 @@ class DSHomeMovieItem extends StatelessWidget {
 
   /// 2.内容
   Widget buildContent() {
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -72,6 +73,7 @@ class DSHomeMovieItem extends StatelessWidget {
 
   /// 2.1 内容的图片
   Widget buildContentImage() {
+//    Padding
     return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Image.network(movieItem.imageURL, height: 150));
