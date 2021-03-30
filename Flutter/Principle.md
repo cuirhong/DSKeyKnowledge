@@ -76,3 +76,22 @@ ComponentElement和RenderObjectElement的mount方法最主要的区别：
 为了让RG最小化对App和UI性能的影响，GC对Flutter引擎提供了hooks(钩子)，hooks被通知，当Flutter引擎被侦测到这个App处于闲置的状态，并且没有用户交互的时候。这就给了GC一个空窗期来运行它的手机阶段，并且不会影响性能。
 
 垃圾收集器还可以在那些空闲间隔内进行滑动压缩（sliding compaction），从而通过减少内存碎片来最大程度地减少内存开销
+
+## BuildContext其实就是Element
+```dart
+ @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+    );
+  }
+```
+
+## V8引擎
+VSCode是用typescript写的，转成js代码，然后使用v8引擎解析js代码，v8的垃圾回收机制和Dart的一样
+
+## 总结
+1. 每个Widget都会创建一个Element
+1. Element会去调用mount方法
+- ComponentElement的mount方法会调用Widget的build
+- RenderObjectElement的mount方法创建一个RenderObject（生成一个_renderObject，并引用这个RenderObject；
+- StatefulElement的mount方法会创建state = createState()方法，state._widget = widget
