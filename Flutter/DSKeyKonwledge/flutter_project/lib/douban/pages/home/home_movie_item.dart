@@ -27,7 +27,7 @@ class DSHomeMovieItem extends StatelessWidget {
           SizedBox(height: 8),
           buildContent(),
           SizedBox(height: 8),
-          buildFooter(),
+          buildFooter()
         ],
       ),
     );

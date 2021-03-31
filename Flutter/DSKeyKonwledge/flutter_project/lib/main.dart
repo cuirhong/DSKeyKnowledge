@@ -8,167 +8,115 @@ void main() => runApp(Center(child: MyApp()));
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: DSHomePage());
+    return MaterialApp(debugShowCheckedModeBanner: false, home: DSAppPage());
   }
 }
 
-class DSHomePage extends StatelessWidget {
-  // ignore: public_member_api_docs
-  DSHomePage(){
-    print("构造函数");
 
-    var future = Future(
-        (){
-          return "";
-        }
+class DSCounterWidget extends InheritedWidget{
+  // 1. 共享的数据
+  final int counter;
+
+  /// 2.自定义构造方法
+  DSCounterWidget({this.counter,Widget child}) : super(child:child);
+
+  /// 3.获取祖先最近的当前InheritedWidget
+  static DSCounterWidget of(BuildContext context){
+    return context.dependOnInheritedWidgetOfExactType();
+  }
+
+  /// 4.决定要不要回调didChangeDependencies
+  /// 如果返回true:执行依赖当前的InheritedWidget的State中的didChangeDependencies
+  @override
+  bool updateShouldNotify(DSCounterWidget oldWidget) {
+    return oldWidget.counter != counter;
+  }
+}
+
+class DSShowData extends StatefulWidget{
+  @override
+  _DSShowDataState createState() => _DSShowDataState();
+}
+
+class _DSShowDataState extends State<DSShowData> {
+  @override
+  Widget build(BuildContext context) {
+    int counter = DSCounterWidget.of(context).counter;
+    return Container(
+      color: Colors.red,
+      child: Text("当前计数:${counter}"),
     );
-    future.then((value){
-
-    }).catchError((error){
-
-    }).whenComplete((){
-
-    });
   }
 
-  /// async * 是一个生成器，python中常见
-  Future test() async{
-
-    var total = 0;
-    for(var i = 0;i < 100; i++){
-
-    }
-
-
-
-//    //1.创建管道
-//    ReceivePort receivePort = ReceivePort();
-//    //2.创建isolate
-//    Isolate isolate = await Isolate.spawn<SendPort>(calc, receivePort.sendPort);
-//    //3.监听管道
-//    receivePort.listen((message){
-//
-//    });
-//    Isolate.spawn(calc, 100);
-    await sleep(Duration(seconds: 3));
-    //直接返回结果，内部会自动包裹一个Future
-    return "结果";
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    print("执行了didChangeDependencies");
   }
+}
+class DSShowDateSecond extends StatefulWidget {
+  @override
+  _DSShowDateSecondState createState() => _DSShowDateSecondState();
+}
 
-  void runCalc() async{
-    var result = await compute(calc,100);
-//    return
+class _DSShowDateSecondState extends State<DSShowDateSecond> {
+  @override
+  Widget build(BuildContext context) {
+    int counter = DSCounterWidget.of(context).counter;
+    return Container(
+      color: Colors.blue,
+      child: Text("当前计数:${counter}"),
+    );
   }
+}
 
+class DSAppPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: DSHomePage(),
+    );
+  }
+}
+
+
+class DSHomePage extends StatefulWidget {
+  @override
+  _DSHomePageState createState() => _DSHomePageState();
+}
+
+class _DSHomePageState extends State<DSHomePage> {
+  int _counter = 100;
 
   @override
   Widget build(BuildContext context) {
-    print("build函数");
-    // TODO: implement build
     return Scaffold(
-      appBar: AppBar(title: Text("商品列表")),
-      body: DSContentBody('这是一个传递的信息'),
-    );
-  }
-}
-
-int calc(int count){
-  //耗时操作
-  return count + 1;
-}
-
-class DSContentBody extends StatefulWidget {
-  final String message;
-  DSContentBody(this.message);
-  @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _DSContentState();
-  }
-}
-
-class _DSContentState extends State<DSContentBody> {
-  var _counter = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              RaisedButton(
-                  child: Text("+"),
-                  color: Colors.cyan,
-                  onPressed: () {
-                    setState(() {
-                      _counter++;
-                    });
-                  }),
-              RaisedButton(
-                child: Text('-'),
-                color: Colors.purple,
-                onPressed: () {
-                  setState(() {
-                    _counter--;
-                  });
-                },
-              ),
-              FlatButton(
-
-              ),
-              FadeInImage(
-//                placeholder: ImageProvider,
-                image: NetworkImage(''),
-              ),
-              Flexible()
-            ],
-          ),
-          Text(
-            '当前计数:$_counter',
-            style: TextStyle(fontSize: 20),
-          ),
-          Text(
-            '传递的信息:${widget.message}'
-          ),
-          CustomScrollView(
-            slivers: <Widget>[
-              SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-
-                ),
-                delegate: SliverChildBuilderDelegate(
-                    (BuildContext ctx,int int){
-                      return NotificationListener(
-                        child: Container(),
-                        onNotification: (ScrollNotification notification){
-                          if (notification is ScrollStartNotification){
-                            //开始滚动
-                          }else if (notification is ScrollEndNotification) {
-                            //结束滚动
-                          }else if (notification is ScrollUpdateNotification){
-
-                            print("当前滚动的位置${notification.metrics.pixels}");
-
-                            print("总滚动的距离:${notification.metrics.maxScrollExtent}");
-                          }
-                          //多个NotificationListener，如果返回true就会取消冒泡，false就会继续冒泡
-                          return true;
-                        },
-                      );
-                    }
-                ),
-              )
-            ],
-          )
-        ],
+      appBar: AppBar(title: Text("")),
+      body: DSCounterWidget(
+        counter:_counter,
+        child: Column(
+          children: <Widget>[
+            Container(
+              child: DSShowData(),
+            ),
+            Container(
+              child: DSShowDateSecond(),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton:  FloatingActionButton(
+          onPressed: (){
+            setState(() {
+              _counter++;
+            });
+          },
       ),
     );
   }
 }
+
 
 
 
