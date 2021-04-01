@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/router/detail.dart';
 
 void main() => runApp(Center(child: MyApp()));
+
 ///
 class MyApp extends StatelessWidget {
   @override
@@ -12,16 +14,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-class DSCounterWidget extends InheritedWidget{
+class DSCounterWidget extends InheritedWidget {
   // 1. 共享的数据
   final int counter;
 
+
+
   /// 2.自定义构造方法
-  DSCounterWidget({this.counter,Widget child}) : super(child:child);
+  DSCounterWidget({this.counter, Widget child}) : super(child: child);
 
   /// 3.获取祖先最近的当前InheritedWidget
-  static DSCounterWidget of(BuildContext context){
+  static DSCounterWidget of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType();
   }
 
@@ -33,7 +36,7 @@ class DSCounterWidget extends InheritedWidget{
   }
 }
 
-class DSShowData extends StatefulWidget{
+class DSShowData extends StatefulWidget {
   @override
   _DSShowDataState createState() => _DSShowDataState();
 }
@@ -42,7 +45,9 @@ class _DSShowDataState extends State<DSShowData> {
   @override
   Widget build(BuildContext context) {
     int counter = DSCounterWidget.of(context).counter;
+
     return Container(
+      // Route()
       color: Colors.red,
       child: Text("当前计数:${counter}"),
     );
@@ -55,6 +60,7 @@ class _DSShowDataState extends State<DSShowData> {
     print("执行了didChangeDependencies");
   }
 }
+
 class DSShowDateSecond extends StatefulWidget {
   @override
   _DSShowDateSecondState createState() => _DSShowDateSecondState();
@@ -80,7 +86,6 @@ class DSAppPage extends StatelessWidget {
   }
 }
 
-
 class DSHomePage extends StatefulWidget {
   @override
   _DSHomePageState createState() => _DSHomePageState();
@@ -94,29 +99,52 @@ class _DSHomePageState extends State<DSHomePage> {
     return Scaffold(
       appBar: AppBar(title: Text("")),
       body: DSCounterWidget(
-        counter:_counter,
-        child: Column(
-          children: <Widget>[
-            Container(
-              child: DSShowData(),
+          counter: _counter,
+          child: GestureDetector(
+            onTapDown: (details) {
+              //手指按下
+            },
+            onTapUp: (details) {
+              //手指抬起
+            },
+            onTapCancel: () {
+              //手势取消
+            },
+            onTap: () {
+              //手势点击
+              print("点击消息");
+              _junpToDeltail();
+            },
+            onDoubleTap: () {
+              //手指双击
+            },
+            child: Container(
+              width: 200,
+              height: 200,
+              color: Colors.red,
             ),
-            Container(
-              child: DSShowDateSecond(),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton:  FloatingActionButton(
-          onPressed: (){
-            setState(() {
-              _counter++;
-            });
-          },
+          )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _counter++;
+          });
+        },
       ),
     );
   }
+  
+  void _junpToDeltail(){
+    // Navigator.of(context);
+   Future result = Navigator.push(context, MaterialPageRoute(
+      builder: (ctx){
+        return DSDetailPage();
+      }
+    ));
+   result.then((res){
+     //子页面回传信息
+   });
+
+   Navigator.pop(context,"");
+  }
 }
-
-
-
-
