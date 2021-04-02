@@ -114,3 +114,6 @@ cd 到flutter SDK目录下，执行
 ```dart
 rm ./flutter/bin/cache/lockfile
 ```
+
+## 升级Xcode导致项目运行出错
+删除：Flutter项目/ios/Flutter/App.framework，重新运行

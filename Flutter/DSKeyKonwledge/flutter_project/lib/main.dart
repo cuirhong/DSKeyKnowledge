@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/router/detail.dart';
+import 'package:flutter_project/utils/screen_size_fit.dart';
 
 void main() => runApp(Center(child: MyApp()));
 
@@ -10,6 +11,7 @@ void main() => runApp(Center(child: MyApp()));
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(debugShowCheckedModeBanner: false,
         title: "",
         theme: ThemeData(
@@ -28,6 +30,7 @@ class DSAppPage extends StatefulWidget {
 class _DSAppPageState extends State<DSAppPage> {
   @override
   Widget build(BuildContext context) {
+    print("object".ds_split('d'));
     return Container();
   }
 }
