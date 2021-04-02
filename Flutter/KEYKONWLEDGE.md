@@ -4,6 +4,28 @@
 ```ruby
 flutter create 项目名称
 ```
+## 项目配置
+### 安卓配置
+ - 配置appid
+
+  ./Android/app/src/build.gradle文件
+  ```dart
+      defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // 配置安卓项目的appid
+        applicationId "com.example.flutter_project"
+        minSdkVersion 16
+        targetSdkVersion 28
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+  ```
+- 配置名字
+./Android/app/main/AndroidMainfest.xml文件配置label
+- 配置icon
+./Android/app/main/res
+分别配置mipmap对应的不同尺寸图片
 ## 热重载和热重启
 - 热重载(hot reload)：最主要执行build方法
 - 热重启(hot restart)：重新运行整个APP
