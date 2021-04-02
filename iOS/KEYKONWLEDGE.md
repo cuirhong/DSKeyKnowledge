@@ -56,3 +56,13 @@ memory write 0x10010 10
 ## 苹果的源码库
 https://opensource.apple.com/tarballs/
 
+## Cocopods
+检测spec文件是否生效
+```ruby
+pod spec lint OTDavisCategory.podspec --verbose
+```
+推送代码到cocopods
+```ruby
+pod trunk push OTDavisCategory.podspec --allow-warnings
+```
+

@@ -1,5 +1,9 @@
 # 快捷键
 ## Xcode
+代码格式化
+```ruby
+Control + i
+```
 
 ## Android Studio 
 代码格式化
@@ -36,3 +40,11 @@ Option + Enter
 Commond + Option + B
 ```
 ## VSCode
+代码格式化
+```ruby
+Option + Shift + F
+```
+返回上一个光标
+```ruby
+Control + -
+```

@@ -24,7 +24,17 @@
 - [Flutter渲染原理](./Flutter/Principle.md)
 - [Widget中Key的作用](./Flutter/Key.md)
 - [状态管理](./Flutter/StateManager.md)
+- [动画](./Flutter/Animation.md)
+- [事件和路由](./Flutter/EventRouter.md)
+- [主题](./Flutter/Theme.md)
+- [屏幕适配](./Flutter/ScreenAdapt.md)
 
 ## Ionic
 - [运行和调试](./ionic/Ionic.md)
 
+## 数据库
+- [数据库常规命令](./Database/KEYKONWLEDGE.md)
+
+## 其他
+- [快捷键](./Other/Fast-key.md)
+- [Git命令](./Other/Git.md)
