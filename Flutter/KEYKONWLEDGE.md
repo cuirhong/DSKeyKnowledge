@@ -104,3 +104,13 @@ linter:
 ```dart
 dartanalyzer lib
 ```
+
+## 报错
+```dart
+Waiting for another flutter command to release the startup lock
+```
+解决方案：  
+cd 到flutter SDK目录下，执行
+```dart
+rm ./flutter/bin/cache/lockfile
+```
