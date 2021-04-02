@@ -10,141 +10,30 @@ void main() => runApp(Center(child: MyApp()));
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: DSAppPage());
+    return MaterialApp(debugShowCheckedModeBanner: false,
+        title: "",
+        theme: ThemeData(
+          primarySwatch:Colors.red,
+        ),
+        home: DSAppPage());
   }
 }
 
-class DSCounterWidget extends InheritedWidget {
-  // 1. 共享的数据
-  final int counter;
-
-
-
-  /// 2.自定义构造方法
-  DSCounterWidget({this.counter, Widget child}) : super(child: child);
-
-  /// 3.获取祖先最近的当前InheritedWidget
-  static DSCounterWidget of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType();
-  }
-
-  /// 4.决定要不要回调didChangeDependencies
-  /// 如果返回true:执行依赖当前的InheritedWidget的State中的didChangeDependencies
+///
+class DSAppPage extends StatefulWidget {
   @override
-  bool updateShouldNotify(DSCounterWidget oldWidget) {
-    return oldWidget.counter != counter;
-  }
+  _DSAppPageState createState() => _DSAppPageState();
 }
 
-class DSShowData extends StatefulWidget {
-  @override
-  _DSShowDataState createState() => _DSShowDataState();
-}
-
-class _DSShowDataState extends State<DSShowData> {
+class _DSAppPageState extends State<DSAppPage> {
   @override
   Widget build(BuildContext context) {
-    int counter = DSCounterWidget.of(context).counter;
-
-    return Container(
-      // Route()
-      color: Colors.red,
-      child: Text("当前计数:${counter}"),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-    print("执行了didChangeDependencies");
+    return Container();
   }
 }
 
-class DSShowDateSecond extends StatefulWidget {
-  @override
-  _DSShowDateSecondState createState() => _DSShowDateSecondState();
-}
-
-class _DSShowDateSecondState extends State<DSShowDateSecond> {
-  @override
-  Widget build(BuildContext context) {
-    int counter = DSCounterWidget.of(context).counter;
-    return Container(
-      color: Colors.blue,
-      child: Text("当前计数:${counter}"),
-    );
-  }
-}
-
-class DSAppPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: DSHomePage(),
-    );
-  }
-}
-
-class DSHomePage extends StatefulWidget {
-  @override
-  _DSHomePageState createState() => _DSHomePageState();
-}
-
-class _DSHomePageState extends State<DSHomePage> {
-  int _counter = 100;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("")),
-      body: DSCounterWidget(
-          counter: _counter,
-          child: GestureDetector(
-            onTapDown: (details) {
-              //手指按下
-            },
-            onTapUp: (details) {
-              //手指抬起
-            },
-            onTapCancel: () {
-              //手势取消
-            },
-            onTap: () {
-              //手势点击
-              print("点击消息");
-              _junpToDeltail();
-            },
-            onDoubleTap: () {
-              //手指双击
-            },
-            child: Container(
-              width: 200,
-              height: 200,
-              color: Colors.red,
-            ),
-          )),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _counter++;
-          });
-        },
-      ),
-    );
-  }
-  
-  void _junpToDeltail(){
-    // Navigator.of(context);
-   Future result = Navigator.push(context, MaterialPageRoute(
-      builder: (ctx){
-        return DSDetailPage();
-      }
-    ));
-   result.then((res){
-     //子页面回传信息
-   });
-
-   Navigator.pop(context,"");
-  }
-}
+ 
+ 
+ 
+ 
+ 

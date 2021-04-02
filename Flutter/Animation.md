@@ -78,3 +78,81 @@ class Tween<T extends dynamic> extends Animatable<T> {
     - 如果构建的Widget有子类，那么子类依然会build
 - AnimatedBuilder(推荐，最优)
 ## 交织动画
+```dart
+  AnimationController controller;
+  Animation<double> animation;
+
+  Animation<Color> colorAnim;
+  Animation<double> sizeAnim;
+  Animation<double> rotationAnim;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 1.创建AnimationController
+    controller = AnimationController(duration: Duration(seconds: 2), vsync: this);
+    // 2.动画添加Curve效果
+    animation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+    // 3.监听动画
+    animation.addListener(() {
+      setState(() {});
+    });
+
+    // 4.设置值的变化
+    colorAnim = ColorTween(begin: Colors.blue, end: Colors.red).animate(controller);
+    sizeAnim = Tween(begin: 0.0, end: 200.0).animate(controller);
+    rotationAnim = Tween(begin: 0.0, end: 2*pi).animate(controller);
+  }
+
+
+@override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (ctx, child) {
+          return Opacity(
+            opacity: animation.value,
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationZ(rotationAnim.value),
+              child: Container(
+                width: sizeAnim.value,
+                height: sizeAnim.value,
+                color: colorAnim.value,
+                alignment: Alignment.center,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+```
+
+## iOS的Modal弹出页面方式
+```dart
+Navigator.of(context).push(MaterialPageRoute(
+  builder:(ctx){
+     return HYModalPage();
+  },
+  fullscreenDialog:true
+));
+```
+
+## 页面渐变显示/渐变消失
+```dart
+Navigator.of(context).push(PageRouteBuilder(
+  pageBuilder:(ctx,animation1,animation2){
+    transitionDuration:Duration(seconds:3),
+     return FadeTransition(
+       opacity:animation1,
+       child:HYModalPage(),
+     );
+  },
+  fullscreenDialog:true
+));
+```
+
+## Hero动画

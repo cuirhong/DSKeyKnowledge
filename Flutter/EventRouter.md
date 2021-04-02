@@ -192,3 +192,6 @@ onUnknownRoute: (settings) {
   );
 }
 ```
+
+## initStatus里面需要使用delayed或者timer才可以使用modalRoute  
+有可能是context里面还有部分东西没有准备好
