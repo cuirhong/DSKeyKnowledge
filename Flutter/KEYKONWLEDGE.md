@@ -1,4 +1,9 @@
 # 杂乱笔记
+
+## 命令行创建Flutter项目
+```ruby
+flutter create 项目名称
+```
 ## 热重载和热重启
 - 热重载(hot reload)：最主要执行build方法
 - 热重启(hot restart)：重新运行整个APP
