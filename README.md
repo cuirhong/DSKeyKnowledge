@@ -28,6 +28,8 @@
 - [事件和路由](./Flutter/EventRouter.md)
 - [主题](./Flutter/Theme.md)
 - [屏幕适配](./Flutter/ScreenAdapt.md)
+- [国际化](./Flutter/I18n.md)
+- [测试-编译-发布](./Flutter/TestBuildRelease.md)
 
 ## Ionic
 - [运行和调试](./ionic/Ionic.md)
