@@ -26,6 +26,9 @@ flutter create 项目名称
 - 配置icon
 ./Android/app/main/res
 分别配置mipmap对应的不同尺寸图片
+### iOS配置
+不要在Android studio修改iOS项目，使用Xcode打开修改
+- 配置名字：最好在info.plist文件中改，其他地方修改会引起Flutter运行报错
 ## 热重载和热重启
 - 热重载(hot reload)：最主要执行build方法
 - 热重启(hot restart)：重新运行整个APP

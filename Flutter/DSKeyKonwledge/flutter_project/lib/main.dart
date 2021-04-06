@@ -30,7 +30,7 @@ class DSAppPage extends StatefulWidget {
 class _DSAppPageState extends State<DSAppPage> {
   @override
   Widget build(BuildContext context) {
-    print("object".ds_split('d'));
+
     return Container();
   }
 }
