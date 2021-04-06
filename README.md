@@ -30,6 +30,7 @@
 - [屏幕适配](./Flutter/ScreenAdapt.md)
 - [国际化](./Flutter/I18n.md)
 - [测试-编译-发布](./Flutter/TestBuildRelease.md)
+- [混合开发](./Flutter/MixDev.md)
 
 ## Ionic
 - [运行和调试](./ionic/Ionic.md)
