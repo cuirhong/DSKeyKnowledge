@@ -111,3 +111,10 @@ git remote show origin
 git remote prune 
 ```
  
+## 合并另一个分支的某一个提交
+```ruby
+# 指定某一次提交到dev分支 
+git checkout dev
+# 8e20cd55d7cc949263719a2ae4b2924ad7e8dc8e : 指定提交的id
+git cherry-pick 8e20cd55d7cc949263719a2ae4b2924ad7e8dc8e
+```

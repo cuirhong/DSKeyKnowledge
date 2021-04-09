@@ -147,3 +147,19 @@ rm ./flutter/bin/cache/lockfile
 
 ## 升级Xcode导致项目运行出错
 删除：Flutter项目/ios/Flutter/App.framework，重新运行
+
+## Flutter特性
+- Fast
+- Productive
+- Beautiful
+- Open
+- Portable(可移植性)
+## Flutter web特性
+- 性能
+- Web特有的功能和组件
+- 桌面浏览器的特性
+> iRobot:典型的flutter web项目
+
+## 多个轻形引擎
+[官方Demo](https://github.com/flutter/samples/tree/master/add_to_app/multiple_flutters)  
+[怎么用](https://flutter.cn/docs/development/add-to-app/multiple-flutters)
