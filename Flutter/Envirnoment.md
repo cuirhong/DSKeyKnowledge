@@ -67,3 +67,13 @@ exprot FLUTTER_STORAGE_BASE_URL=https://storage.flutter
 右下角configs->AVD manager
 - xcode  
  左上角xcode->Open Developer Tool->Simulator
+
+
+## Flutter和Native混合开发，如何进行Debug断点调试
+- 杀掉相关进程（Flutter单运行的、Native运行的）
+- 点击Android studio顶部工具栏的[Flutter Attach]按钮(就在运行按钮右边👉),等待控制台进入Debug状态:
+```android
+Checking for advertised Dart observatories...
+Waiting for a connection from Flutter on iPhone xxxx
+```
+- 再运行Native，Flutter打上断点即可进行调试
