@@ -77,3 +77,8 @@ Checking for advertised Dart observatories...
 Waiting for a connection from Flutter on iPhone xxxx
 ```
 - 再运行Native，Flutter打上断点即可进行调试
+### Flutter Attach报错
+```dart
+There are multiple observatory ports available. Rerun this command with one of the following passed in as the appId:
+```
+> 解决方案：最简单的就是断网一下，其余方案待补充
