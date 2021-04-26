@@ -7,6 +7,7 @@ npm install
 ionic build
 # 指定ios版本安装，版本有问题的话会报错（根据项目中的版本来）
 ionic cordova platform add ios@5.1.1
+# 获取真机的id，修改platforms/ios中的bundle id（对应证书的），然后可以通过下面命名运行到真机
 ionic cordova run ios --target 5D647E25-84C6-4F8C-8618-4EDB3F7E38DA
 ```
 ### ionic cordova platform rm ios有坑
@@ -40,4 +41,6 @@ brew install ideviceinstaller ios-webkit-debug-proxy
 #### 出现找不到web视图
 - 一直没成功，模拟器找不到设置
 - 真机可以尝试设置: 设置->Safari->高级->网页检查器(打开)，重试看看
+
+
 
