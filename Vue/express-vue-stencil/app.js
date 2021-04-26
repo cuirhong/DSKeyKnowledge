@@ -17,7 +17,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 // ----------------这两行被我们注释掉了-----------
 // app.use('/', indexRouter);
@@ -26,8 +26,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ----------------这三行是我们新添加的-----------
 var history = require('connect-history-api-fallback');
-app.use(express.static(path.join(__dirname, 'dist')));
 app.use(history());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
+
 //---------------------------------------------
 
 // catch 404 and forward to error handler
