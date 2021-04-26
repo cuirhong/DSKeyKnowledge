@@ -126,4 +126,5 @@ app.use(history());
 ```ruby
 npm start
 ```
-在浏览器中打开http://localhost:3000/，看到Vue的界面就大功告成了
+在浏览器中打开http://localhost:3000/，看到Vue的界面就大功告成了  
+[参考文档](https://zhuanlan.zhihu.com/p/116749549)
