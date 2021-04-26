@@ -116,8 +116,10 @@ npm install --save connect-history-api-fallback
 
 // ----------------这三行是我们新添加的-----------
 var history = require('connect-history-api-fallback');
-app.use(express.static(path.join(__dirname, 'dist')));
+//app.use(history());一定要放在dist文件加载之前，很多官方都放在后面，又出现访问不了的问题
 app.use(history());
+
+app.use(express.static(path.join(__dirname, 'dist')));
 //---------------------------------------------
 ```
 让页面自动访问index.html
@@ -128,3 +130,6 @@ npm start
 ```
 在浏览器中打开http://localhost:3000/，看到Vue的界面就大功告成了  
 [参考文档](https://zhuanlan.zhihu.com/p/116749549)
+
+### 访问404
+- build的assetsPublicPath设置，使用express部署的时候，需要改为"/"，其他的可能需要改为"./"
