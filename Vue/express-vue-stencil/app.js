@@ -19,8 +19,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// ----------------这两行被我们注释掉了-----------
+// app.use('/', indexRouter);
+// app.use('/users', usersRouter);
+//---------------------------------------------
+
+// ----------------这三行是我们新添加的-----------
+var history = require('connect-history-api-fallback');
+app.use(express.static(path.join(__dirname, 'dist')));
+app.use(history());
+//---------------------------------------------
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
