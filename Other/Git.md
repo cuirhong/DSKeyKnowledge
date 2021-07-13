@@ -118,3 +118,24 @@ git checkout dev
 # 8e20cd55d7cc949263719a2ae4b2924ad7e8dc8e : 指定提交的id
 git cherry-pick 8e20cd55d7cc949263719a2ae4b2924ad7e8dc8e
 ```
+## 回滚到之前某次提交(本地+远程)
+### 回滚到之前某一个版本（该版本后的提交都不需要）
+```ruby
+// 查看提交日志
+git log 
+// 回滚到之前的版本，此时本地已经回滚，远程仓库还未回滚
+git reset --hard 910983dsd8938kjfg8kd8m3m3jh33kl3jbg
+// 回滚远程仓库版本
+git push -f
+```
+### 回滚到之前某一个版本（但该版本后的提交仍需保留）
+```ruby
+git revert -n 910983dsd8938kjfg8kd8m3m3jh33kl3jbg
+git commit "备注提交信息"
+//推送到远程仓库
+git push
+```
+### 回滚到某一个版本(git commit 但未push)
+```ruby
+git reset --soft HEAD^
+```
