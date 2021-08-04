@@ -163,3 +163,14 @@ rm ./flutter/bin/cache/lockfile
 ## 多个轻形引擎
 [官方Demo](https://github.com/flutter/samples/tree/master/add_to_app/multiple_flutters)  
 [怎么用](https://flutter.cn/docs/development/add-to-app/multiple-flutters)
+
+## flutter attach
+```
+There are multiple observatory ports available.
+Rerun this command with one of the following passed in as the appId:
+
+  flutter attach --app-id com.jhbshow.flutterModule
+  flutter attach --app-id com.jhbshow.flutterModule (2)
+```
+解决办法：把其他app进程杀掉或者断网
+ 
