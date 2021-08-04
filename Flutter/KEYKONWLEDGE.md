@@ -163,3 +163,12 @@ rm ./flutter/bin/cache/lockfile
 ## 多个轻形引擎
 [官方Demo](https://github.com/flutter/samples/tree/master/add_to_app/multiple_flutters)  
 [怎么用](https://flutter.cn/docs/development/add-to-app/multiple-flutters)
+
+## 踩坑笔记
+### Textfiled输入框剧中的问题  
+采用TextStyle的height解决，结合textAlignVertical
+```dart
+TextStyle(
+  height:2.0
+)
+```
