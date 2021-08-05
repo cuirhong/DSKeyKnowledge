@@ -174,3 +174,11 @@ Rerun this command with one of the following passed in as the appId:
 ```
 解决办法：把其他app进程杀掉或者断网
  
+## 踩坑笔记
+### Textfiled输入框剧中的问题  
+采用TextStyle的height解决，结合textAlignVertical
+```dart
+TextStyle(
+  height:2.0
+)
+```
